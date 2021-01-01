@@ -1,0 +1,6 @@
+My Un*x commands
+
+These shell scripts are POSIX compliant.
+
+* Cmds list
+  cr -- ColoRing text using Regex on a VT102 emulator
