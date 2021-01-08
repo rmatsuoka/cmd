@@ -20,7 +20,7 @@ white=$(printf '\033[037m')
 default=$(printf '\033[039m')
 
 error(){
-	printf '%s: %s\n' "$prgname" "$@" 2>&1
+	printf '%s: %s\n' "$prgname" "$1" 1>&2
 	exit 1
 }
 help_msg(){
@@ -60,10 +60,10 @@ while [ $# -gt 0 ]; do
 		help_msg
 		exit 0
 		;;
-	-*)	error "illegal option -- $1"
-		;;
 	--)	shift
 		break
+		;;
+	-?*)	error "illegal option -- $1"
 		;;
 	*)	break
 		;;
