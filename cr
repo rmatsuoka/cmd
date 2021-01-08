@@ -94,5 +94,4 @@ if  [ "X$fname" != "X-" ] &&  ! [ -f "$fname" ];then
 	error "$fname: No such file or directory"
 fi
 
-printf "$default"
 cat "$fname" | sed $Eflag 's/'"$regex"'/'"$ctlseq"'&'"$default"'/g'
