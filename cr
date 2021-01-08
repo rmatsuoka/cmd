@@ -34,7 +34,7 @@ ColoRing text using Regex on a VT102 emulator
 
 * Options
   -c <color> Specify color to convert regex-matching text (see color list)
-  -E         Interpret <regex> as extended regex (You can specify this option if your sed has this option. This option is not POSIX compliant.)
+  -E         Interpret <regex> as extended regex (You can specify this option if your sed has -E opton. This is not POSIX compliant.)
  
 * Color list
   black
