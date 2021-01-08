@@ -72,7 +72,7 @@ while [ $# -gt 0 ]; do
 done
 
 regex="$1"
-fname="${2:--}"
+fname="$2"
 
 case "$color" in
 black)	ctlseq=$black;;
@@ -89,7 +89,7 @@ esac
 
 regex="$(printf '%s\n' "$regex" | sed 's:/:\\/:g')"
 
-case "$fname" in '-'|/*|./*|../*):;; *)fname="./$fname";;esac
+case "X$fname" in X)fname='-';; X-|X/*|X./*|X../*):;; *)fname="./$fname";; esac
 if  [ "X$fname" != "X-" ] &&  ! [ -f "$fname" ];then
 	error "$fname: No such file or directory"
 fi
