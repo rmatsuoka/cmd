@@ -71,7 +71,7 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
-regrex="$1"
+regex="$1"
 fname="${2:--}"
 
 case "$color" in
@@ -87,7 +87,7 @@ default)	ctlseq=$default;;
 *) error "illegal color -- $color";;
 esac
 
-regrex="$(printf '%s\n' "$regrex" | sed 's:/:\\/:g')"
+regex="$(printf '%s\n' "$regex" | sed 's:/:\\/:g')"
 
 case "$fname" in '-'|/*|./*|../*):;; *)fname="./$fname";;esac
 if  [ "X$fname" != "X-" ] &&  ! [ -f "$fname" ];then
@@ -95,4 +95,4 @@ if  [ "X$fname" != "X-" ] &&  ! [ -f "$fname" ];then
 fi
 
 printf "$default"
-cat "$fname" | sed $Eflag 's/'"$regrex"'/'"$ctlseq"'&'"$default"'/g'
+cat "$fname" | sed $Eflag 's/'"$regex"'/'"$ctlseq"'&'"$default"'/g'
