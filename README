@@ -4,3 +4,4 @@ These shell scripts are POSIX compliant.
 
 * Cmds list
   cr -- ColoRing text using Regex
+  mc -- multicolumn print
