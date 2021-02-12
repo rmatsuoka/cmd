@@ -2,7 +2,8 @@
 
 export IFS=' 	
 '
-export PATH='/usr/bin:/bin'
+SYS_PATH=$(command -p getconf PATH 2>/dev/null)
+export PATH="${SYS_PATH:-/bin:/usr/bin}${PATH:+:}${PATH}"
 prgname=$(basename "$0")
 
 sflag=0
@@ -39,7 +40,7 @@ done
 : ${fname:=-}
 
 if [ -z "$width" ];then
-	width=$(tput cols) || width=$width_default
+	width=$(tput cols 2>/dev/null) || width=$width_default
 else
 	width=${width%%[!0-9]*}
 fi
