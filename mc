@@ -62,9 +62,9 @@ function printmc(l, n, x, col, row){
 	for(i = 0; i < row; i++){
 		# until the last element but one each col
 		for(j = 0; j < (col - 1) && ((j + 1)*row + i) < n; j++){
-			printf("%-*s ", x, line[j*row + i])
+			printf("%-*s ", x, l[j*row + i])
 		}
-		printf("%s\n", line[j*row + i])
+		printf("%s\n", l[j*row + i])
 	}
 }
 BEGIN{
