@@ -7,10 +7,9 @@ export PATH="${SYS_PATH:-/bin:/usr/bin}${PATH:+:}${PATH}"
 prgname=$(basename "$0")
 
 sflag=0
-width=
-width_default=80
-TAB=4
 fname=
+width=$(tput cols 2> /dev/null)
+: ${width:=80}
 
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -27,25 +26,25 @@ while [ $# -gt 0 ]; do
 	shift
 done
 
+width=${width%%[!0-9]*}
+
+{
+[ $# -eq 0 ] && cat -
 for i; do
 	if [ -f "$i" ]; then
-		fname="$fname \"$i\""
+		case "$i" in /*) :;; *) i="./$i" ;; esac
+		printf '%s\n' "$i"
 	elif [ -d "$i" ]; then
-		fname="$fname /dev/null"
+		echo /dev/null
 	else
 		printf '%s: can'\''t open %s (No such file or directory)\n' "$prgname" "$i" 1>&2
-		fname="$fname /dev/null"
+		echo /dev/null
 	fi
+done |
+while read -r fname; do
+	cat "$fname"
 done
-: ${fname:=-}
-
-if [ -z "$width" ];then
-	width=$(tput cols 2>/dev/null) || width=$width_default
-else
-	width=${width%%[!0-9]*}
-fi
-
-eval cat "$fname" |
+} |
 awk '
 function ceil(x){
 	return int(x) + (x - int(x) > 0)
