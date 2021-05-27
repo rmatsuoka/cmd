@@ -2,12 +2,57 @@
 
 export IFS=' 	
 '
-export PATH='/usr/bin:/bin'
-prgname=$(basename $0)
+SYSPATH=$(command -p getconf PATH 2>/dev/null)
+export PATH="${SYSPATH:-/bin:/usr/bin}${PATH:+:$PATH}"
+progname=$(basename "$0")
+
+usage(){
+	cat <<EOF
+usage: $progname [-E] [-c color] pattern [file...]
+EOF
+}
+help(){
+	usage
+	cat <<EOF
+
+colorize the strings that match a pattern
+
+OPTIONS
+	-c color
+		Specify a color from COLOR LIST.
+
+	-E	Treat a pattern as extended regex.
+
+OPERANDS
+	 pattern
+		Specify a pattern to be used colorize for input. Without
+		-E option, the pattern is treated as basic regex.
+	 file	Specify a pathname of files. If no file operands are
+	 	specified, the stdin shall be used.
+ 
+COLOR LIST
+	 FULLNAME   ABBREV
+	 black      k
+	 red        r
+	 green      g
+	 yellow     y
+	 blue       b
+	 magenta    m
+	 cyan       c
+	 white      w
+	 default    d
+EOF
+}
+error(){
+	printf '%s: %s\n' "$progname" "$1" 1>&2
+	usage 1>&2
+	exit 1
+}
 
 Eflag=
 color='red'
 ctlseq=
+regex=
 
 black=$(printf '\033[030m')
 red=$(printf '\033[031m')
@@ -19,79 +64,33 @@ cyan=$(printf '\033[036m')
 white=$(printf '\033[037m')
 default=$(printf '\033[039m')
 
-error(){
-	printf '%s: %s\n' "$prgname" "$1" 1>&2
-	exit 1
-}
-help_msg(){
-	cat <<EOF
-Usage: $prgname [ -c <color> ] [ -E ] <regex> [ <file> ]
-
-ColoRing text using Regex on a VT102 emulator
-
-  <regex> Basic regex.
-  <file>  A text file. if <file> is '-' or null, then read from stdin.
-
-* Options
-  -c <color> Specify color to convert regex-matching text (see color list)
-  -E         Interpret <regex> as extended regex (You can specify this option if your sed has -E opton. This is not POSIX compliant.)
- 
-* Color list
-  black
-  red
-  green
-  yellow
-  blue
-  magenta
-  cyan
-  white
-  default
-EOF
-}
-
-while [ $# -gt 0 ]; do
-	case "$1" in
-	-c)	color="$2"
-		shift
-		;;
-	-E)	Eflag="$1"
-		;;
-	-h|--help)
-		help_msg
-		exit 0
-		;;
-	--)	shift
-		break
-		;;
-	-?*)	error "illegal option -- $1"
-		;;
-	*)	break
-		;;
+while getopts c:Eh opt ; do
+	case "$opt" in
+	c)	color="$OPTARG";;
+	E)	Eflag='-E';;
+	h)	help; exit 0;;
+	?)	usage 1>&2; exit 1;;
 	esac
-	shift
 done
-
-regex="$1"
-fname="$2"
+shift $((OPTIND - 1))
 
 case "$color" in
-black)	ctlseq=$black;;
-red)	ctlseq=$red;;
-green)	ctlseq=$green;;
-yellow)	ctlseq=$yellow;;
-blue)	ctlseq=$blue;;
-magenta)	ctlseq=$magenta;;
-cyan)	ctlseq=$cyan;;
-white)	ctlseq=$white;;
-default)	ctlseq=$default;;
-*) error "illegal color -- $color";;
+black|k)   ctlseq=$black;;
+red|r)     ctlseq=$red;;
+green|g)   ctlseq=$green;;
+yellow|y)  ctlseq=$yellow;;
+blue|b)    ctlseq=$blue;;
+magenta|m) ctlseq=$magenta;;
+cyan|c)    ctlseq=$cyan;;
+white|w)   ctlseq=$white;;
+default|d) ctlseq=$default;;
+*)         error "illegal color -- $color";;
 esac
 
+regex=${1:-'.*'}
+[ $# -ge 1 ] && shift
+
+# escape '/' in regex for sed
 regex="$(printf '%s\n' "$regex" | sed 's:/:\\/:g')"
 
-case "X$fname" in X)fname='-';; X-|X/*|X./*|X../*):;; *)fname="./$fname";; esac
-if  [ "X$fname" != "X-" ] &&  ! [ -f "$fname" ];then
-	error "$fname: No such file or directory"
-fi
-
-cat "$fname" | sed $Eflag 's/'"$regex"'/'"$ctlseq"'&'"$default"'/g'
+sed $Eflag 's/'"$regex"'/'"$ctlseq"'&'"$default"'/g' -- ${1+"$@"} 

@@ -2,6 +2,6 @@ My Un*x commands
 
 These shell scripts are POSIX compliant.
 
-* Cmds list
-  cr -- ColoRing text using Regex
+# commands
+  cr -- colorize the string which mathce a pattern
   mc -- multicolumn print
