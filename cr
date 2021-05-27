@@ -93,4 +93,4 @@ regex=${1:-'.*'}
 # escape '/' in regex for sed
 regex="$(printf '%s\n' "$regex" | sed 's:/:\\/:g')"
 
-sed $Eflag 's/'"$regex"'/'"$ctlseq"'&'"$default"'/g' -- ${1+"$@"} 
+sed $Eflag -- 's/'"$regex"'/'"$ctlseq"'&'"$default"'/g' ${1+"$@"}
