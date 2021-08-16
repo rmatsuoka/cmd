@@ -3,7 +3,7 @@
 export IFS=' 	
 '
 syspath=$(command -p getconf PATH 2>/dev/null)
-PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
+export PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
 progname=$(basename "$0")
 usage="$progname [-h] [-A] [-s SIGNAL_NAME] procname..."
 
@@ -22,10 +22,13 @@ OPTIONS
 
 EXAMPLES
 	$progname -s KILL xeyes firefox | sh
+
+BUGS
+	If you run this on a busybox environment, you must specify -A.
 EOF
 }
 
-userlist="-u $(id -u)"
+userlist="-U $(id -un)"
 killcmd=$(command -pv kill)
 sigName=TERM
 
