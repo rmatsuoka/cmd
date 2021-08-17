@@ -6,6 +6,7 @@ syspath=$(command -p getconf PATH 2>/dev/null)
 export PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
 progname=$(basename "$0")
 usage="$progname [-h] [-A] [-s SIGNAL_NAME] procname..."
+cpid=$$
 
 displayHelp(){
 	cat <<EOF
@@ -43,15 +44,17 @@ done
 shift $((OPTIND - 1))
 
 for proc; do
-	ps -o pid,user,args $userlist | sed 1d |
-	awk -v proc="$proc" -v killcmd="$killcmd" -v sigName="$sigName" '
+	ps -o pid,ppid,user,args $userlist | sed 1d |
+	awk -v proc="$proc" -v killcmd="$killcmd" \
+		-v sigName="$sigName" -v cpid="$cpid" '
 	function base(p) {
 		sub(/.*\//, "", p)
 		sub(/:$/, "", p)
 		sub(/^-/, "", p)
 		return p
 	}
-	base($3) == proc {
+	$2 == cpid { next }
+	base($4) == proc {
 		printf("%s -s %s %d # %s %s\n", killcmd, sigName, $1, $2, $3)
 	}'
 done
