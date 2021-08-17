@@ -53,8 +53,8 @@ for proc; do
 		sub(/^-/, "", p)
 		return p
 	}
-	$2 == cpid { next }
+	$1 == cpid || $2 == cpid { next }
 	base($4) == proc {
-		printf("%s -s %s %d # %s %s\n", killcmd, sigName, $1, $2, $3)
+		printf("%s -s %s %d # %s %s\n", killcmd, sigName, $1, $3, $4)
 	}'
 done
