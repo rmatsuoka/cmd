@@ -3,7 +3,7 @@
 export IFS=' 	
 '
 syspath=$(command -p getconf PATH 2>/dev/null)
-export PATH="${syspath:-/bin:/usr/bin}${PATH:+:PATH}"
+export PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
 progname=$(basename "$0")
 
 colon=0
