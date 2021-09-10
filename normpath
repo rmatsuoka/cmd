@@ -1,0 +1,60 @@
+#!/bin/sh
+
+export IFS=' 	
+'
+syspath=$(command -p getconf PATH 2>/dev/null)
+export PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
+progname=$(basename "$0")
+usage="$progname path..."
+
+help(){
+	cat <<EOF >&2
+NAME
+	$progname -- normalize paths
+
+SYNOPSIS
+	$usage
+
+OPTIONS
+	-h	show this
+
+EXAMPLE
+	$ pwd
+	/home/you
+	$ normpath  ..  /home/./you/../../usr/bin/abc
+	/home
+	/usr/bin/abc
+	$
+
+NOTE
+	This utility does not check for existence of files in the path.
+EOF
+}
+
+while getopts h flag; do
+	case "$flag" in
+	h)	help >&2 ; exit 1;;
+	?)	printf 'usage: %s\n' "$usage" >&2; exit 1;;
+	esac
+done
+shift $((OPTIND - 1))
+
+for i; do
+	case "$i" in /*):;; *)i="$PWD/$i";; esac
+	printf '%s\n' "$i" |
+	tr '/' '\n' |
+	awk '
+		BEGIN{ c=0 }
+		"." == $0 || "" == $0 { next }
+		".." == $0{
+			c = (c==0) ? 0 : c-1
+			next
+		}
+		{ p[++c] = $0 }
+		END{
+			printf("/")
+			for(i=1;i<=c;i++)
+				printf("%s%s", p[i], i==c ? "" : "/")
+			printf("\n")
+		}'
+done
