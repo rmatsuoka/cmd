@@ -1,8 +1,0 @@
-My Un*x commands
-
-These shell scripts are POSIX compliant.
-
-# commands
-  cr -- colorize the string which mathce a pattern
-  mc -- multicolumn print
-  mktempfifo -- create a temporary named pipe
