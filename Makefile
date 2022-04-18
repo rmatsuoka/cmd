@@ -1,10 +1,12 @@
 # Makefile
 
 prefix= ${HOME}
-TARGET= cr \
+TARGET= \
+	cr \
 	mc \
 	mktempfifo \
 	normpath \
+	pio \
 	zap
 
 all:

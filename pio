@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# pio - pick from input and print
+# pio reads one line and asks yes/no and prints the selection to stdout.
+#
+# example
+# $ ls | pio | xargs rm
+# file.1 [y/n/q]? y
+# file.2 [y/n/q]? n
+# file.3 [y/n/q]? q
+# $
+# # file.1 is removed!
+
+IFS='	
+'
+syspath=$(command -p getconf PATH 2>/dev/null)
+PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
+
+progname=$(basename "$0")
+
+usage() {
+	printf 'usage: %s [FILE...]\n' "$progname" >&2
+	exit 1
+}
+
+while getopts h opt
+do
+	case "$opt" in
+	h|?) usage;;
+	esac
+done
+shift $((OPTIND-1))
+
+cat -- ${1+"$@"} |
+while read -r i
+do
+	printf '%s [y/n/q]? ' "$i" > /dev/tty
+	read -r a < /dev/tty # On old Unix, it could not work
+	case "$a" in
+	y|Y) printf '%s\n' "$i";;
+	q|Q) exit 1;;
+	*) :;;
+	esac
+done
