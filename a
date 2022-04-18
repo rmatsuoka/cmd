@@ -1,0 +1,8 @@
+#!/bin/sh
+# wapper for acme editor
+
+export SHELL="$PLAN9/bin/rc"
+export PAGER="$PLAN9/bin/nobs"
+export EDITOR='ed'
+export COLUMNS=72
+$PLAN9/bin/acme ${1+"$@"}

@@ -2,6 +2,7 @@
 
 prefix= ${HOME}
 TARGET= \
+	a \
 	cr \
 	mc \
 	mktempfifo \
