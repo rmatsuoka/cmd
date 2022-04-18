@@ -1,75 +1,60 @@
 #!/bin/sh
-export IFS=' 	
+
+# mktempfifo: create a temporary named file, print its name
+#
+# template
+#	Specify a template for the named file. It must contain at
+#	least 6 consecutive 'X's in last component. If template
+#	is not specified, use \$TMPDIR/tmpfifo.XXXXXXXXXX. If
+#	\$TMPDIR is unset or null, then use /tmp.
+
+IFS=' 	
 '
-SYSPATH=$(command -p getconf PATH 2>/dev/null)
-export PATH="${SYSPATH:-/bin:/usr/bin}${PATH:+:$PATH}"
+syspath=$(command -p getconf PATH 2>/dev/null)
+PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
 progname=$(basename "$0")
 
-usage(){
-	cat <<EOF
-usage: $progname [template]
-EOF
+usage() {
+	printf 'usage: %s [template]\n' "$progname" >&2
+	exit 1
 }
-help(){
-	usage
-	cat <<EOF
 
-create a temporary named file, print its name
-
-OPERAND
-	template
-		Specify a template for the named file. It must contain at
-		least 6 consecutive 'X's in last component. If template
-		is not specified, use \$TMPDIR/tmpfifo.XXXXXXXXXX. If
-		\$TMPDIR is unset or null, then use /tmp.
-EOF
-}
-error(){
-	printf '%s: %s\n\n' "$progname" "$1" 1>&2
-	usage 1>&2
+fatal() {
+	printf '%s: %s\n' "$progname" "$1" 1>&2
 	exit ${2:-1}
 }
 
-_mktempfifo(){
+_mktempfifo() (
 	[ -r /dev/urandom ] || return 1
 
-	TMPDIR_mktempfifo=${TMPDIR:-/tmp}
-	template_mktempfifo=${1:-"${TMPDIR_mktempfifo%/}/tmpfifo.XXXXXXXXXX"}
-	prefix_mktempfifo=$(printf '%s\n' "$template_mktempfifo" | sed 's/X*$//')
-	numX_mktempfifo=$((${#template_mktempfifo} - ${#prefix_mktempfifo}))
-	[ "$numX_mktempfifo" -ge 6 ] || return 1
+	tempchar='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+	TMPDIR=${TMPDIR:-/tmp}
+	template=${1:-"${TMPDIR%/}/tmpfifo.XXXXXXXXXX"}
+	prefix=$(printf '%s\n' "$template" | sed 's/X*$//')
+	numX=$((${#template} - ${#prefix}))
+	[ "$numX" -ge 6 ] || return 1
 
-	# try 3 times
-	for i_mktempfifo in 1 2 3; do
-		tempfile_mktempfifo="$prefix_mktempfifo"$(
-		od -v -A n -t uS /dev/urandom |
-		awk '{for(i=1;i<=NF;i++){print $i}}' |
-		awk -v numX="$numX_mktempfifo" '
-		BEGIN{
-			char="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-			len=length(char)
-		}
-		{
-			printf("%s", substr(char, ($1 % len) + 1, 1))
-		}
-		NR == numX{
-			printf("\n")
-			exit 0
-		}')
-		mkfifo -m 0600 "$tempfile_mktempfifo" 1>&2
-		if [ $? -eq 0 ]; then
-			printf '%s\n' "$tempfile_mktempfifo"; return 0
+	# try 10 times
+	for i in 1 2 3 4 5 6 7 8 9 10
+	do
+		suffix=$(tr -dc  "$tempchar" < /dev/urandom |
+			dd bs="$numX" count=1 2>/dev/null)
+		tempfifo="${prefix}${suffix}"
+		mkfifo -m 0600 "$tempfifo" 1>&2
+		if [ $? -eq 0 ]
+		then
+			printf '%s\n' "$tempfifo"
+			return 0
 		fi
 	done
 	return 1
-}
+)
 
 while getopts h opt; do
 	case "$opt" in
-	h)	help ;exit 0;;
-	?)	usage 1>&2;exit 1;;
+	h|?) usage;;
 	esac
 done
 shift $((OPTIND-1))
 
-_mktempfifo ${1+"$1"} || error 'cannot create temporary named pipe' $?
+_mktempfifo ${1+"$1"} || fatal 'cannot create temporary named pipe' $?
