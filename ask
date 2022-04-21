@@ -1,15 +1,14 @@
 #!/bin/sh
 
-# pio - pick from input and print
-# pio reads one line and asks yes/no and prints the selection to stdout.
+# ask - reads one line and asks yes/no and prints the selection to stdout.
 #
 # example
-# $ ls | pio | xargs rm
-# file.1 [y/n/q]? y
-# file.2 [y/n/q]? n
-# file.3 [y/n/q]? q
+# $ ls .. | ask -p ../ | xargs rm
+# ../file.1 [y/n/q]? y
+# ../file.2 [y/n/q]? n
+# ../file.3 [y/n/q]? q
 # $
-# # file.1 is removed!
+# # ../file.1 is removed!
 
 IFS='	
 '
@@ -19,25 +18,29 @@ PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
 progname=$(basename "$0")
 
 usage() {
-	printf 'usage: %s [FILE...]\n' "$progname" >&2
+	printf 'usage: %s [-p PREFIX] [-s SUFFIX]\n' "$progname" >&2
 	exit 1
 }
 
-while getopts h opt
+prefix=
+suffix=
+
+while getopts p:s:h opt
 do
 	case "$opt" in
-	h|?) usage;;
+	p)	prefix="$OPTARG";;
+	s)	suffix="$OPTARG";;
+	h|?)	usage;;
 	esac
 done
 shift $((OPTIND-1))
 
-cat -- ${1+"$@"} |
 while read -r i
 do
-	printf '%s [y/n/q]? ' "$i" > /dev/tty
+	printf '%s%s%s [y/n/q]? ' "$prefix" "$i" "$suffix" > /dev/tty
 	read -r a < /dev/tty # On old Unix, it could not work
 	case "$a" in
-	y|Y) printf '%s\n' "$i";;
+	y|Y) printf '%s%s%s\n' "$prefix" "$i" "$suffix";;
 	q|Q) exit 1;;
 	*) :;;
 	esac
