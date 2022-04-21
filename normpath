@@ -5,42 +5,27 @@ export IFS='
 syspath=$(command -p getconf PATH 2>/dev/null)
 export PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
 progname=$(basename "$0")
-usage="$progname path..."
 
-help(){
-	cat <<EOF >&2
-NAME
-	$progname -- normalize paths
-
-SYNOPSIS
-	$usage
-
-OPTIONS
-	-h	show this
-
-EXAMPLE
-	$ pwd
-	/home/you
-	$ normpath  ..  /home/./you/../../usr/bin/abc
-	/home
-	/usr/bin/abc
-	$
-
-NOTE
-	This utility does not check for existence of files in the path.
-EOF
+usage() {
+	printf 'usage: %s path...\n' "$progname" >&2
+	exit 1
 }
 
-while getopts h flag; do
+while getopts h flag
+do
 	case "$flag" in
-	h)	help >&2 ; exit 1;;
-	?)	printf 'usage: %s\n' "$usage" >&2; exit 1;;
+	h|?)	usage;;
 	esac
 done
 shift $((OPTIND - 1))
 
-for i; do
-	case "$i" in /*):;; *)i="$PWD/$i";; esac
+for i
+do
+	case "$i" in
+	/*):;;
+	*)i="$PWD/$i";;
+	esac
+
 	printf '%s\n' "$i" |
 	tr '/' '\n' |
 	awk '
