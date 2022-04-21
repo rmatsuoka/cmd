@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# rank input lines.
+sort -- ${1+"$@"} | uniq -c | sort -n -r

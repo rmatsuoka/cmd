@@ -1,0 +1,21 @@
+#!/bin/sh
+
+progname="$(basename "$0")"
+usage() {
+	printf 'usage: %s times cmd [args...]\n' "$progname" >&2
+	exit 1
+}
+
+N=${1}
+case x"$N" in
+x|x*[!0-9]*) usage
+esac
+
+shift
+
+i=0
+while [ "$i" -lt "$N" ]
+do
+	"$@"
+	i=$((i+1))
+done

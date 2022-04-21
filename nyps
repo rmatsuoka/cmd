@@ -1,0 +1,4 @@
+#!/bin/sh
+# nyps - say nyanpasu in Japanese for testings for UTF-8.
+
+printf '\343\201\253\343\202\203\343\202\223\343\201\261\343\201\231\n'

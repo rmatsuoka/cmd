@@ -2,12 +2,16 @@
 
 prefix= ${HOME}
 TARGET= \
+	5 \
 	a \
 	cr \
 	mc \
 	mktempfifo \
 	normpath \
+	nyps \
 	pio \
+	rank \
+	repeat \
 	zap
 
 all:
