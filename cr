@@ -2,57 +2,45 @@
 
 export IFS=' 	
 '
-SYSPATH=$(command -p getconf PATH 2>/dev/null)
-export PATH="${SYSPATH:-/bin:/usr/bin}${PATH:+:$PATH}"
-progname=$(basename "$0")
+syspath=$(command -p getconf PATH 2>/dev/null)
+export PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
+progname="$(basename "$0")"
 
 usage(){
-	cat <<EOF
+	cat <<EOF >&2
 usage: $progname [-E] [-c color] pattern [file...]
-EOF
-}
-help(){
-	usage
-	cat <<EOF
+  -c color
+      Specify a color as FULLNAME or ABBREV in COLOR LIST.
 
-colorize the strings that match a pattern
+  -E  Treat a pattern as extended regex.
 
-OPTIONS
-	-c color
-		Specify a color from COLOR LIST.
-
-	-E	Treat a pattern as extended regex.
-
-OPERANDS
-	 pattern
-		Specify a pattern to be used colorize for input. Without
-		-E option, the pattern is treated as basic regex.
-	 file	Specify a pathname of files. If no file operands are
-	 	specified, the stdin shall be used.
+  pattern
+	sed-style regex.
  
 COLOR LIST
-	 FULLNAME   ABBREV
-	 black      k
-	 red        r
-	 green      g
-	 yellow     y
-	 blue       b
-	 magenta    m
-	 cyan       c
-	 white      w
-	 default    d
+  FULLNAME   ABBREV
+  black      k
+  red        r
+  green      g
+  yellow     y
+  blue       b
+  magenta    m
+  cyan       c
+  white      w
+  default    d
 EOF
+	exit 1
 }
-error(){
+
+fatal(){
 	printf '%s: %s\n' "$progname" "$1" 1>&2
-	usage 1>&2
 	exit 1
 }
 
 Eflag=
-color='red'
 ctlseq=
 regex=
+color='red'
 
 black=$(printf '\033[030m')
 red=$(printf '\033[031m')
@@ -68,11 +56,18 @@ while getopts c:Eh opt ; do
 	case "$opt" in
 	c)	color="$OPTARG";;
 	E)	Eflag='-E';;
-	h)	help; exit 0;;
-	?)	usage 1>&2; exit 1;;
+	h|?)	usage;;
 	esac
 done
-shift $((OPTIND - 1))
+shift $((OPTIND-1))
+
+if [ $# -lt 1 ]
+then
+	fatal 'no pattern specified'
+fi
+regex="$1"
+shift
+
 
 case "$color" in
 black|k)   ctlseq=$black;;
@@ -84,13 +79,10 @@ magenta|m) ctlseq=$magenta;;
 cyan|c)    ctlseq=$cyan;;
 white|w)   ctlseq=$white;;
 default|d) ctlseq=$default;;
-*)         error "illegal color -- $color";;
+*)         fatal "unknown color -- $color";;
 esac
-
-regex=${1:-'.*'}
-[ $# -ge 1 ] && shift
 
 # escape '/' in regex for sed
 regex="$(printf '%s\n' "$regex" | sed 's:/:\\/:g')"
 
-sed $Eflag -- 's/'"$regex"'/'"$ctlseq"'&'"$default"'/g' ${1+"$@"}
+sed $Eflag -- s/"$regex"/"$ctlseq"'&'"$default"/g ${1+"$@"}
