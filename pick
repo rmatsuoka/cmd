@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# pick - select arguments
+#
+# example
+# $ ls | pick -i | xargs rm
+# file.1 [y/n/q]? y
+# file.2 [y/n/q]? n
+# file.3 [y/n/q]? q
+# $
+# # file.1 is removed!
+
+IFS='	
+'
+syspath=$(command -p getconf PATH 2>/dev/null)
+PATH="${syspath:-/bin:/usr/bin}${PATH:+:$PATH}"
+progname="$(basename "$0")"
+
+usage() {
+	printf 'usage: %s arg...\n' "$progname" >&2
+	printf '       %s -i [file...]\n' "$progname" >&2
+	exit 1
+}
+
+iflag=false
+while getopts ih opt
+do
+	case "$opt" in
+	i)      iflag=true;;
+	h|?)	usage;;
+	esac
+done
+shift $((OPTIND-1))
+
+if [ "$iflag" = true ]
+then
+	cat -- ${1+"$@"}
+else
+	for i
+	do
+		echo "$i"
+	done
+fi |
+while read -r line
+do
+	printf '%s ?' "$line" > /dev/tty
+	read -r a < /dev/tty # On old Unix, it could not work
+	case "$a" in
+	y*) printf '%s\n' "$line";;
+	q*) exit 2;;
+	esac
+done

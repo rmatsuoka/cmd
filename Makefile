@@ -4,12 +4,12 @@ prefix= ${HOME}
 TARGET= \
 	5 \
 	a \
-	ask \
 	cr \
 	mc \
 	mktempfifo \
 	normpath \
 	nyps \
+	pick \
 	rank \
 	repeat \
 	zap
