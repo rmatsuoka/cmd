@@ -38,7 +38,7 @@ then
 else
 	for i
 	do
-		echo "$i"
+		printf '%s\n' "$i"
 	done
 fi |
 while read -r line
