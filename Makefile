@@ -1,6 +1,6 @@
 # Makefile
 
-prefix= ${HOME}
+PREFIX= ${HOME}/.local
 TARGET= \
 	5 \
 	a \
@@ -15,10 +15,12 @@ TARGET= \
 	zap
 
 all:
-	@echo 'run "make install" to install utilities at $${prefix}/bin = ${prefix}/bin'
+	@echo 'run "make install"'
 
 install:
+	mkdir -p "${PREFIX}/bin"
 	for i in ${TARGET}; do \
-		cp "$$i" ${prefix}/bin || exit $$?; \
-		chmod +x "${prefix}/bin/$$i" || exit $$?; \
+		rm -f "${PREFIX}/bin/$$i"; \
+		cp "$$i" ${PREFIX}/bin || exit $$?; \
+		chmod +x "${PREFIX}/bin/$$i" || exit $$?; \
 	done
