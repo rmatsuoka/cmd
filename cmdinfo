@@ -1,0 +1,54 @@
+#!/bin/sh
+
+progname=$(basename "$0")
+
+usage() {
+	cat <<EOF >&2
+usage: $progname cmdname
+EOF
+	exit 1
+}
+
+fatal() {
+	printf '%s: %s\n' "$progname" "$1" >&2
+	exit 1
+}
+
+printeval() {
+	printf '$ %s\n' "$1"
+	eval "$1"
+	printf "\n"
+}
+
+recreadlink() (
+	p="$1"
+	while [ -L "$p" ]
+	do
+		printf '$ readlink %s\n' "$p"
+		np="$(readlink "$p")"
+		printf '%s\n\n' "$np"
+		case "$np" in
+		(/*)	p="$np";;
+		(*)	p="$(dirname "$p")/$np";;
+		esac
+	done
+)
+
+while getopts h opt
+do
+	case $opt in
+	*|h) usage;;
+	esac
+done
+shift $((OPTIND-1))
+
+[ $# -lt 1 ] && usage
+
+cmdname="$1"
+abs=$(which "$cmdname") || fatal "not find $cmdname"
+
+printeval "which $cmdname"
+[ -L "$abs" ] && recreadlink "$abs"
+printeval "ls -dlL $abs"
+printeval "file -L $abs"
+printeval "man -f $cmdname"
