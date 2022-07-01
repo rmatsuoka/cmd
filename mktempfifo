@@ -25,6 +25,8 @@ fatal() {
 }
 
 _mktempfifo() (
+	export LANG=C
+	export LC_ALL=C
 	[ -r /dev/urandom ] || return 1
 
 	tempchar='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
