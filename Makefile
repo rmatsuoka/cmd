@@ -4,6 +4,7 @@ PREFIX= ${HOME}/.local
 TARGET= \
 	5 \
 	a \
+	cmdinfo \
 	cr \
 	mc \
 	mktempfifo \
