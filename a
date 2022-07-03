@@ -6,4 +6,4 @@ export PAGER="$PLAN9/bin/nobs"
 export EDITOR='ed'
 export COLUMNS=72
 
-$PLAN9/bin/acme ${font+-f "$font"} ${1+"$@"}
+$PLAN9/bin/acme -a ${font+-f "$font"} ${1+"$@"}
