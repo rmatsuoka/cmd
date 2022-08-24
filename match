@@ -1,0 +1,19 @@
+#!/bin/sh
+
+progname=$(basename "$0")
+usage() {
+	printf 'usage: %s awk-regexp [FILE ...]\n' "$progname" >&2
+	exit 1
+}
+
+[ $# -eq 0 ] && usage
+
+regexp=$(printf '%s' "$1" | sed 's|/|\\/|g')
+shift
+
+awk '
+{
+	if (match($0, /'"$regexp"'/) != 0) {
+		print substr($0, RSTART, RLENGTH)
+	}
+}' "$@"

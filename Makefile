@@ -6,6 +6,7 @@ TARGET= \
 	a \
 	cmdinfo \
 	cr \
+	match \
 	mc \
 	mktempfifo \
 	normpath \
